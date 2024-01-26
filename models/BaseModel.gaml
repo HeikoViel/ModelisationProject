@@ -13,7 +13,7 @@ model BaseModel
 global {
 	int nb_collector <- 5;
 	int nb_drifwood <- 50;
-	int nb_pile <- 5;
+	int nb_pile <- nb_collector;
 	int number_of_zone <- 4;
 	int width <- 500;
 	int height <- 100;
@@ -25,13 +25,13 @@ global {
 	init {
 		
 		create pile number: nb_pile {
-			location <- point(rnd(500), rnd(80, 100));
+			location <- point(rnd(width), rnd(80, 100));
 		}
 		create collector number: nb_collector {
-			location <- point(rnd(500), rnd(80, 100));
+			location <- point(rnd(width), rnd(80, 100));
 		}
 		create driftwood number: nb_drifwood {
-			location <- point(rnd(500), rnd(0, 70));
+			location <- point(rnd(width), rnd(0, 70));
 		}
 		
 		loop times: number_of_zone {
@@ -118,6 +118,12 @@ species driftwood {
 }
 
 experiment base_model {
+	
+	parameter "Nb_collector" var: nb_collector min: 0;
+	parameter "Shore distance" var: width min: 300;
+	parameter "Nb zone" var: number_of_zone min: 1 max: nb_collector;
+	parameter "Nb driftwood" var: nb_drifwood min: 20;
+	
 	output {
 		display environment {
 			species pile;
