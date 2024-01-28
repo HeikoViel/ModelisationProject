@@ -15,7 +15,7 @@ global {
 	int nb_thief <- 20;
 	int nb_drifwood <- 500;
 	int nb_pile <- nb_collector + nb_thief;
-	int number_of_zone <- 5;
+	int number_of_zone <- nb_collector;
 	int width <- 500;
 	int height <- 100;
 	
@@ -248,10 +248,10 @@ species driftwood {
 
 experiment extension_1 {
 	
-	parameter "Nb_collector" var: nb_collector min: 0;
+	parameter "Nb_collector" var: nb_collector min: 1;
 	parameter "Shore distance" var: width min: 300;
-	parameter "Nb zone" var: number_of_zone min: 1 max: nb_collector;
 	parameter "Nb driftwood" var: nb_drifwood min: 20;
+	parameter "Nb Thief" var: nb_thief min: 1;
 	
 	output {
 		display environment {

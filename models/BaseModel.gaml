@@ -147,9 +147,8 @@ species driftwood {
 
 experiment base_model {
 	
-	parameter "Nb_collector" var: nb_collector min: 0;
+	parameter "Nb_collector" var: nb_collector min: 1;
 	parameter "Shore distance" var: width min: 300;
-	parameter "Nb zone" var: number_of_zone min: 1 max: nb_collector;
 	parameter "Nb driftwood" var: nb_drifwood min: 20;
 	
 	output {
