@@ -13,10 +13,10 @@ model BaseModel
 global {
 	int nb_collector <- 5;
 	int nb_drifwood <- 50;
-	int nb_pile <- nb_collector;
 	int number_of_zone <- nb_collector;
 	int width <- 500;
 	int height <- 100;
+	int capacity_max <- 5;
 	
 	geometry shape <- rectangle(width, height);
 	point test <- point(0, 0);
@@ -25,10 +25,6 @@ global {
 	int id <- 0;
 	
 	init {
-		
-		create pile number: nb_pile {
-			location <- point(rnd(width), rnd(80, 100));
-		}
 		create collector number: nb_collector {
 			location <- point(rnd(width), rnd(80, 100));
 		}
@@ -72,13 +68,13 @@ species pile {
 	int id_collector;
 	
 	aspect default {
-		draw circle(4) color: (is_occupied = false) ? #white : color;
-		draw "" + id_collector color: (is_occupied = false) ? #white : #black;
+		draw circle(4) color: color;
+		draw "" + id_collector color: #black;
 	}
 }
 
 species collector skills: [moving]{
-	int capacity <- rnd(2,5);
+	int capacity <- rnd(2,capacity_max);
 	bool go_collect <- false;
 	geometry zone <- nil;
 	rgb color <- rnd_color(255);
@@ -113,7 +109,7 @@ species collector skills: [moving]{
 		do goto target: driftwood_target speed:speed ;
 		if (location = driftwood_target.location) {
 			ask driftwood_target {
-				is_collected <- true;
+				do die;
 			}
 			driftwood_target <- nil;
 			wood_collected <- wood_collected + 1;
@@ -122,10 +118,13 @@ species collector skills: [moving]{
 	
 	reflex go_to_pile when: wood_collected = capacity or no_more_wood_on_zone {
 		if(pile_collector = nil) {
-			pile_collector <- one_of(pile where(each.is_occupied = false));
-			pile_collector.color <- color;
-			pile_collector.is_occupied <- true;
-			pile_collector.id_collector <- id_collector;
+			create pile number: 1 {
+				location <- point(rnd(width), rnd(80, 100));
+				color <- myself.color;
+				is_occupied <- true;
+				id_collector <- myself.id_collector;
+				myself.pile_collector <- self;
+			}
 		}
 		do goto target: pile_collector.location speed: speed;
 		if (location = pile_collector.location) {
@@ -150,6 +149,7 @@ experiment base_model {
 	parameter "Nb_collector" var: nb_collector min: 1;
 	parameter "Shore distance" var: width min: 300;
 	parameter "Nb driftwood" var: nb_drifwood min: 20;
+	parameter "Capacity Max" var: capacity_max min: 2 max: 10;
 	
 	output {
 		display environment {

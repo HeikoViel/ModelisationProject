@@ -14,10 +14,10 @@ global {
 	int nb_collector <- 5;
 	int nb_thief <- 20;
 	int nb_drifwood <- 500;
-	int nb_pile <- nb_collector + nb_thief;
 	int number_of_zone <- nb_collector;
 	int width <- 500;
 	int height <- 100;
+	int capacity_max <- 5;
 	
 	geometry shape <- rectangle(width, height);
 	point test <- point(0, 0);
@@ -26,10 +26,6 @@ global {
 	int id <- 0;
 	
 	init {
-		
-		create pile number: nb_pile {
-			location <- point(rnd(width), rnd(80, 100));
-		}
 		create collector number: nb_collector {
 			location <- point(rnd(width), rnd(80, 100));
 		}
@@ -94,7 +90,7 @@ species pile {
 }
 
 species person {
-	int capacity <- rnd(2,5);
+	int capacity <- rnd(2,capacity_max);
 	rgb color <- rnd_color(255);
 	pile pile_collector;
 	int wood_collected <- 0;
@@ -132,7 +128,7 @@ species collector skills: [moving] parent: person{
 		do goto target: driftwood_target speed:speed ;
 		if (location = driftwood_target.location) {
 			ask driftwood_target {
-				is_collected <- true;
+				do die;
 			}
 			driftwood_target <- nil;
 			wood_collected <- wood_collected + 1;
@@ -142,10 +138,13 @@ species collector skills: [moving] parent: person{
 	reflex go_to_pile when: wood_collected = capacity or no_more_wood_on_zone {
 		go_collect <- false;
 		if(pile_collector = nil) {
-			pile_collector <- one_of(pile where(each.is_occupied = false));
-			pile_collector.color <- color;
-			pile_collector.is_occupied <- true;
-			pile_collector.id_collector <- id_collector;
+			create pile number: 1 {
+				location <- point(rnd(width), rnd(80, 100));
+				color <- myself.color;
+				is_occupied <- true;
+				id_collector <- myself.id_collector;
+				myself.pile_collector <- self;
+			}
 		}
 		do goto target: pile_collector.location speed: speed;
 		if (location = pile_collector.location) {
@@ -161,7 +160,7 @@ species collector skills: [moving] parent: person{
 
 species thief skills: [moving] parent: person {
 	collector target_collector;
-	bool free <- true;
+	bool free <- false;
 	point test <- point(rnd(width), rnd(80, 100));
 	
 	aspect default {
@@ -170,7 +169,9 @@ species thief skills: [moving] parent: person {
 	}
 	
 	reflex choose_target when: target_collector = nil and wood_collected < capacity and pile_collector = nil {
-		collector random_collector <- one_of(collector where((each.go_collect) and (each.pile_collector != nil)));
+		collector random_collector <- one_of(collector where((each.pile_collector != nil) and 
+			each.location distance_to each.pile_collector.location > 30
+		));
 		if random_collector != nil {
 			if random_collector.pile_collector.nb_wood > 0 {
 				target_collector <- random_collector;
@@ -197,7 +198,7 @@ species thief skills: [moving] parent: person {
 	}
 		
 	reflex check_target when: target_collector != nil {
-		if !target_collector.go_collect {
+		if (target_collector.location distance_to target_collector.pile_collector.location < 50) {
 			target_collector <- nil;
 			free <- true;
 		}
@@ -214,10 +215,13 @@ species thief skills: [moving] parent: person {
 	action go_to_pile_action {
 		free <- false;
 		if(pile_collector = nil) {
-			pile_collector <- one_of(pile where(each.is_occupied = false));
-			pile_collector.color <- color;
-			pile_collector.is_occupied <- true;
-			pile_collector.id_collector <- id_collector;
+			create pile number: 1 {
+				location <- point(rnd(width), rnd(80, 100));
+				color <- myself.color;
+				is_occupied <- true;
+				id_collector <- myself.id_collector;
+				myself.pile_collector <- self;
+			}
 		}
 		do goto target: pile_collector.location speed: speed;
 		if (location = pile_collector.location) {
@@ -252,6 +256,7 @@ experiment extension_1 {
 	parameter "Shore distance" var: width min: 300;
 	parameter "Nb driftwood" var: nb_drifwood min: 20;
 	parameter "Nb Thief" var: nb_thief min: 1;
+	parameter "Capacity Max" var: capacity_max min: 2 max: 50;
 	
 	output {
 		display environment {
