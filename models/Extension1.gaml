@@ -6,7 +6,7 @@
 */
 
 
-model Extension1V2
+model Extension1
 
 /* Insert your model definition here */
 global {
