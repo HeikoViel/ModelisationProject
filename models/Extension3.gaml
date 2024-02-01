@@ -11,13 +11,13 @@ model Extension3
 
 global {
 	int nb_collector <- 20;
-	int nb_drifwood <- 100;
-	int number_of_zone <- 12;
+	int nb_drifwood <- 200;
+	int number_of_zone <- 20;
 	int width <- 1000;
 	int height <- 100;
 	int capacity_max <- 10;
 	int nb_authorities <- 3;
-	int size_group <- 8;
+	int size_group <- 10;
 	int number_of_group;
 	
 	int distance_monitor <- 50;
@@ -86,6 +86,7 @@ global {
 							has_zone <- true;
 						}
  						write(co.name + " id : " + co.id_collector + ", has zone : " + has_zone +
+ 							", group number: " + co.id_Group +
  							", wood collection : " + string(co.pile_collector.nb_wood) + 
  							"; wood stolen : " + string(co.wood_stolen)
  						);
@@ -98,7 +99,6 @@ global {
 species pile {
 	int nb_wood <- 0;
 	rgb color;
-	bool is_occupied <- false;
 	int id_collector;
 	bool is_monitored <- false;
 	
@@ -171,7 +171,6 @@ species collector skills: [moving]{
 			create pile number: 1 {
 				location <- point(rnd(width), rnd(80, 100));
 				color <- myself.color;
-				is_occupied <- true;
 				id_collector <- myself.id_collector;
 				myself.pile_collector <- self;
 			}
@@ -321,13 +320,14 @@ species driftwood {
 	}
 }
 
-experiment extension2 {
+experiment extension3 {
 	
 	float minimum_cycle_duration <- 0.05;
 	
-	parameter "Nb_collector" var: nb_collector min: 1;
+	parameter "Nb_collector" var: nb_collector min: 3;
 	parameter "Shore distance" var: width min: 300;
 	parameter "Nb driftwood" var: nb_drifwood min: 20;
+	parameter "Nb of zones" var: number_of_zone min: 3 max: nb_collector;
 	parameter "Capacity Max" var: capacity_max min: 2 max: 10;
 	parameter "Nb Authorities" var: nb_authorities min: 0 max: 5;
 	parameter "Distance Monitor" var: distance_monitor min: 20 max: 50;

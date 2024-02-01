@@ -64,7 +64,6 @@ global {
 species pile {
 	int nb_wood <- 0;
 	rgb color;
-	bool is_occupied <- false;
 	int id_collector;
 	
 	aspect default {
@@ -75,7 +74,6 @@ species pile {
 
 species collector skills: [moving]{
 	int capacity <- rnd(2,capacity_max);
-	bool go_collect <- false;
 	geometry zone <- nil;
 	rgb color <- rnd_color(255);
 	pile pile_collector;
@@ -121,7 +119,6 @@ species collector skills: [moving]{
 			create pile number: 1 {
 				location <- point(rnd(width), rnd(80, 100));
 				color <- myself.color;
-				is_occupied <- true;
 				id_collector <- myself.id_collector;
 				myself.pile_collector <- self;
 			}
